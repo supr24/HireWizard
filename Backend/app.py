@@ -371,3 +371,15 @@ def get_stats():
         stats['jobsByLocation'][location] = stats['jobsByLocation'].get(location, 0) + 1
     return jsonify({'success': True, 'stats': stats}), 200
 
+# =====================================================
+# SECTION 10: ERROR HANDLERS - Supriya Rawat
+# =====================================================
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'success': False, 'message': 'Not found'}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({'success': False, 'message': 'Server error'}), 500
+
+atexit.register(lambda: scheduler.shutdown())
