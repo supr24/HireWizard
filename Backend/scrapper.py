@@ -75,3 +75,17 @@ class JobScraper:
         except Exception as e:
             print(f"Naukri error: {e}")
         return self.jobs
+
+    # =========================================
+    # SECTION 5: INDEED SCRAPING - Supriya Rawat
+    # =========================================
+    def scrape_indeed(self, keyword="software engineer", location="bangalore", max_jobs=20):
+        """Scrape Indeed (seed data)"""
+        try:
+            all_seed = self.generate_seed_jobs(keyword, location)
+            indeed_jobs = [j for j in all_seed if j['source'] == 'indeed'][:max_jobs]
+            self.jobs.extend(indeed_jobs)
+        except Exception as e:
+            print(f"Indeed error: {e}")
+        return self.jobs
+    
