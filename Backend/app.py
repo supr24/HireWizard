@@ -169,3 +169,31 @@ def update_profile():
     save_data('users.json', users)
     user_data = {k: v for k, v in users[user_index].items() if k != 'password'}
     return jsonify({'success': True, 'user': user_data}), 200
+
+# =====================================================
+# SECTION 5: RESUME UPLOAD - Urvashi Kashyap
+# =====================================================
+@app.route('/api/profile/upload-resume', methods=['POST'])
+def upload_resume():
+    """Upload resume"""
+    if 'resume' not in request.files:
+        return jsonify({'success': False, 'message': 'No file'}), 400
+    file = request.files['resume']
+    user_id = request.form.get('userId')
+    if not user_id or file.filename == '':
+        return jsonify({'success': False, 'message': 'Missing data'}), 400
+    if file and allowed_file(file.filename):
+        filename = secure_filename(f"{user_id}_{file.filename}")
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        users = load_data('users.json')
+        user_index = next((i for i, u in enumerate(users) if u['id'] == user_id), None)
+        if user_index is not None:
+            users[user_index]['resumeFile'] = filename
+            users[user_index]['resumeUploaded'] = True
+            users[user_index]['profileComplete'] = True
+            users[user_index]['updatedAt'] = datetime.now().isoformat()
+            save_data('users.json', users)
+        return jsonify({'success': True, 'filename': filename}), 200
+    return jsonify({'success': False, 'message': 'Invalid file'}), 400
+
