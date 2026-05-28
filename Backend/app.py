@@ -345,3 +345,29 @@ def unsave_job():
     saved = [s for s in saved if not (s['userId'] == data['userId'] and s['jobId'] == data['jobId'])]
     save_data('saved_jobs.json', saved)
     return jsonify({'success': True}), 200
+
+# =====================================================
+# SECTION 9: ANALYTICS ENDPOINT - Ridham Singh
+# =====================================================
+@app.route('/api/analytics/stats', methods=['GET'])
+def get_stats():
+    """Get analytics"""
+    jobs = load_data('jobs.json')
+    users = load_data('users.json')
+    apps = load_data('applications.json')
+    saved = load_data('saved_jobs.json')
+    stats = {
+        'totalJobs': len(jobs),
+        'totalUsers': len(users),
+        'totalApplications': len(apps),
+        'totalSaved': len(saved),
+        'jobsBySource': {},
+        'jobsByLocation': {}
+    }
+    for job in jobs:
+        source = job.get('source', 'unknown')
+        stats['jobsBySource'][source] = stats['jobsBySource'].get(source, 0) + 1
+        location = job.get('location', 'unknown')
+        stats['jobsByLocation'][location] = stats['jobsByLocation'].get(location, 0) + 1
+    return jsonify({'success': True, 'stats': stats}), 200
+
