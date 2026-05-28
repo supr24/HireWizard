@@ -147,3 +147,25 @@ def login():
     user_data = {k: v for k, v in user.items() if k != 'password'}
     return jsonify({'success': True, 'user': user_data}), 200
 
+# =====================================================
+# SECTION 4: PROFILE MANAGEMENT - Supriya Rawat
+# =====================================================
+@app.route('/api/profile/update', methods=['POST'])
+def update_profile():
+    """Update user profile"""
+    data = request.json
+    user_id = data.get('userId')
+    if not user_id:
+        return jsonify({'success': False, 'message': 'User ID required'}), 400
+    users = load_data('users.json')
+    user_index = next((i for i, u in enumerate(users) if u['id'] == user_id), None)
+    if user_index is None:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+    for field in ['phone', 'location', 'experience', 'salary', 'skills', 'education', 'linkedin']:
+        if field in data:
+            users[user_index][field] = data[field]
+    users[user_index]['profileComplete'] = True
+    users[user_index]['updatedAt'] = datetime.now().isoformat()
+    save_data('users.json', users)
+    user_data = {k: v for k, v in users[user_index].items() if k != 'password'}
+    return jsonify({'success': True, 'user': user_data}), 200
