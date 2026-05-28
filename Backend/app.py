@@ -305,3 +305,43 @@ def get_user_applications(user_id):
     applied_jobs = [j for j in jobs if j.get('id') in job_ids]
     return jsonify({'success': True, 'applications': user_apps, 'jobs': applied_jobs, 'count': len(user_apps)}), 200
 
+# =====================================================
+# SECTION 8: SAVED JOBS ENDPOINTS - Supriya Rawat
+# =====================================================
+@app.route('/api/saved/add', methods=['POST'])
+def save_job():
+    """Save job"""
+    data = request.json
+    if not data.get('userId') or not data.get('jobId'):
+        return jsonify({'success': False, 'message': 'Missing fields'}), 400
+    saved = load_data('saved_jobs.json')
+    if any(s['userId'] == data['userId'] and s['jobId'] == data['jobId'] for s in saved):
+        return jsonify({'success': False, 'message': 'Already saved'}), 400
+    saved_entry = {
+        'id': str(uuid.uuid4()),
+        'userId': data['userId'],
+        'jobId': data['jobId'],
+        'savedAt': datetime.now().isoformat()
+    }
+    saved.append(saved_entry)
+    save_data('saved_jobs.json', saved)
+    return jsonify({'success': True, 'saved': saved_entry}), 201
+
+@app.route('/api/saved/user/<user_id>', methods=['GET'])
+def get_saved_jobs(user_id):
+    """Get saved jobs"""
+    saved = load_data('saved_jobs.json')
+    jobs = load_data('jobs.json')
+    user_saved = [s for s in saved if s['userId'] == user_id]
+    job_ids = [s['jobId'] for s in user_saved]
+    saved_jobs_full = [j for j in jobs if j.get('id') in job_ids]
+    return jsonify({'success': True, 'jobs': saved_jobs_full, 'count': len(saved_jobs_full)}), 200
+
+@app.route('/api/saved/remove', methods=['POST'])
+def unsave_job():
+    """Unsave job"""
+    data = request.json
+    saved = load_data('saved_jobs.json')
+    saved = [s for s in saved if not (s['userId'] == data['userId'] and s['jobId'] == data['jobId'])]
+    save_data('saved_jobs.json', saved)
+    return jsonify({'success': True}), 200
