@@ -272,4 +272,36 @@ def get_job(job_id):
         return jsonify({'success': False, 'message': 'Job not found'}), 404
     return jsonify({'success': True, 'job': job}), 200
 
+# =====================================================
+# SECTION 7: APPLICATIONS ENDPOINTS - Urvashi Kashyap
+# =====================================================
+@app.route('/api/applications/apply', methods=['POST'])
+def apply_job():
+    """Apply to job"""
+    data = request.json
+    if not data.get('userId') or not data.get('jobId'):
+        return jsonify({'success': False, 'message': 'Missing fields'}), 400
+    apps = load_data('applications.json')
+    if any(a['userId'] == data['userId'] and a['jobId'] == data['jobId'] for a in apps):
+        return jsonify({'success': False, 'message': 'Already applied'}), 400
+    new_app = {
+        'id': str(uuid.uuid4()),
+        'userId': data['userId'],
+        'jobId': data['jobId'],
+        'status': 'applied',
+        'appliedAt': datetime.now().isoformat()
+    }
+    apps.append(new_app)
+    save_data('applications.json', apps)
+    return jsonify({'success': True, 'application': new_app}), 201
+
+@app.route('/api/applications/user/<user_id>', methods=['GET'])
+def get_user_applications(user_id):
+    """Get user applications"""
+    apps = load_data('applications.json')
+    jobs = load_data('jobs.json')
+    user_apps = [a for a in apps if a['userId'] == user_id]
+    job_ids = [a['jobId'] for a in user_apps]
+    applied_jobs = [j for j in jobs if j.get('id') in job_ids]
+    return jsonify({'success': True, 'applications': user_apps, 'jobs': applied_jobs, 'count': len(user_apps)}), 200
 
