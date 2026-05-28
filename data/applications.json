@@ -1,0 +1,23 @@
+[
+  {
+    "id": "b1d26374-4b55-4fe1-ab70-202ad118a25e",
+    "userId": 1777297799912,
+    "jobId": 1,
+    "status": "applied",
+    "appliedAt": "2026-04-27T19:36:31.193032"
+  },
+  {
+    "id": "65416748-803f-4291-aa60-d3e467ecba26",
+    "userId": "78e47d24-a87d-4139-9623-8f656f3ce999",
+    "jobId": 1,
+    "status": "applied",
+    "appliedAt": "2026-04-27T22:10:56.220850"
+  },
+  {
+    "id": "2b6cde95-7048-4713-acf0-6c18873251cd",
+    "userId": "78e47d24-a87d-4139-9623-8f656f3ce999",
+    "jobId": 6,
+    "status": "applied",
+    "appliedAt": "2026-04-27T22:30:45.811757"
+  }
+]

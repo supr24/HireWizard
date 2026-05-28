@@ -1,0 +1,30 @@
+[
+  {
+    "id": "78e47d24-a87d-4139-9623-8f656f3ce999",
+    "name": "Urvashi Kashyap",
+    "email": "urvashikashyap1603@gmail.com",
+    "password": "scrypt:32768:8:1$n4w3I92fYZ5WxlY8$20600c4f732024da4edbf2f3ff85e16e3ace7980d8c6c8b24d31cb0489f704b62479a0db4622400470568a2204a2a7d08ec50ea251744312daa0e88ccc8d6add",
+    "profileComplete": true,
+    "createdAt": "2026-04-27T22:08:34.741132",
+    "phone": "+91 8279660347",
+    "location": "pune",
+    "experience": "fresher",
+    "salary": "1",
+    "skills": [
+      "html",
+      "css",
+      "js"
+    ],
+    "education": "Btech in CSE",
+    "linkedin": "",
+    "updatedAt": "2026-04-27T22:09:07.901668"
+  },
+  {
+    "id": "d2b4c13f-4bd9-4bc5-b2c8-6191f6a6a9d4",
+    "name": "supriyarawat",
+    "email": "shygbb@gmail.com",
+    "password": "scrypt:32768:8:1$ACT9R9xKnnTqCAVc$581e834e31beab69fa1ae612d42bef805d96da10aaf0e65db4be829d0b4ff502c463c20092e301f7b29a9cb9f5f9ad51b9ecbf018486a672110ef9642f2d45bc",
+    "profileComplete": false,
+    "createdAt": "2026-05-28T11:25:07.091532"
+  }
+]
