@@ -1,3 +1,6 @@
+# =====================================================
+# HireWizard - Job Aggregator Platform - Urvashi Kashyap
+# =====================================================
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,6 +9,7 @@ import json, os, uuid
 from datetime import datetime
 from scraper import JobScraper
 from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 CORS(app)
@@ -48,14 +52,16 @@ def save_data(filename, data):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# =====================================================
+# SECTION 1: AUTO SCRAPING SCHEDULER - Urvashi Kashyap
+# =====================================================
 def auto_scrape_jobs():
-    """Auto-scrape jobs from 5 major cities"""
-    print("Starting job scraping from 5 cities...")
+    """Load job data from all 5 cities"""
+    print("\n" + "="*50)
+    print("Loading job data from 5 cities...")
+    print("="*50)
     
-    # Only 5 cities for faster scraping
     cities = ['bangalore', 'dehradun', 'gurgaon', 'noida', 'delhi']
-    
-    # Different job keywords for variety
     keywords = ['software engineer', 'developer', 'data analyst']
     
     all_jobs = []
@@ -64,11 +70,10 @@ def auto_scrape_jobs():
     for city in cities:
         for keyword in keywords:
             try:
-                print(f"Scraping {keyword} in {city}...")
                 jobs = scraper.scrape_all(keyword=keyword, location=city)
                 
                 for job in jobs:
-                    job_key = (job['title'].lower(), job['company'].lower())
+                    job_key = (job['title'].lower(), job['company'].lower(), job['salary'], job['experience'], job['source'])
                     if job_key not in seen_jobs:
                         seen_jobs.add(job_key)
                         all_jobs.append(job)
@@ -77,246 +82,18 @@ def auto_scrape_jobs():
                 print(f"Error: {e}")
                 continue
     
-    # Re-index all jobs
     for idx, job in enumerate(all_jobs, 1):
         job['id'] = idx
     
     save_data('jobs.json', all_jobs)
-    print(f"Total jobs scraped: {len(all_jobs)}")
+    print("="*50)
+    print(f"✅ Total jobs loaded: {len(all_jobs)}")
+    print("="*50 + "\n")
     return all_jobs
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=auto_scrape_jobs, trigger="interval", hours=6)
 scheduler.start()
 
-print("Initial scraping...")
+print("Initial loading...")
 auto_scrape_jobs()
-
-@app.route('/')
-def serve_frontend():
-    return send_from_directory(app.static_folder, 'index.html')
-
-@app.route('/<path:path>')
-def serve_static(path):
-    return send_from_directory(app.static_folder, path)
-
-@app.route('/api/auth/signup', methods=['POST'])
-def signup():
-    data = request.json
-    if not data.get('name') or not data.get('email') or not data.get('password'):
-        return jsonify({'success': False, 'message': 'Missing fields'}), 400
-    users = load_data('users.json')
-    if any(u['email'] == data['email'] for u in users):
-        return jsonify({'success': False, 'message': 'Email exists'}), 400
-    new_user = {
-        'id': str(uuid.uuid4()),
-        'name': data['name'],
-        'email': data['email'],
-        'password': generate_password_hash(data['password']),
-        'profileComplete': False,
-        'createdAt': datetime.now().isoformat()
-    }
-    users.append(new_user)
-    save_data('users.json', users)
-    user_data = {k: v for k, v in new_user.items() if k != 'password'}
-    return jsonify({'success': True, 'user': user_data}), 201
-
-@app.route('/api/auth/login', methods=['POST'])
-def login():
-    data = request.json
-    if not data.get('email') or not data.get('password'):
-        return jsonify({'success': False, 'message': 'Missing email or password'}), 400
-    users = load_data('users.json')
-    user = next((u for u in users if u['email'] == data['email']), None)
-    if not user or not check_password_hash(user['password'], data['password']):
-        return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
-    user_data = {k: v for k, v in user.items() if k != 'password'}
-    return jsonify({'success': True, 'user': user_data}), 200
-
-@app.route('/api/profile/update', methods=['POST'])
-def update_profile():
-    data = request.json
-    user_id = data.get('userId')
-    if not user_id:
-        return jsonify({'success': False, 'message': 'User ID required'}), 400
-    users = load_data('users.json')
-    user_index = next((i for i, u in enumerate(users) if u['id'] == user_id), None)
-    if user_index is None:
-        return jsonify({'success': False, 'message': 'User not found'}), 404
-    for field in ['phone', 'location', 'experience', 'salary', 'skills', 'education', 'linkedin']:
-        if field in data:
-            users[user_index][field] = data[field]
-    users[user_index]['profileComplete'] = True
-    users[user_index]['updatedAt'] = datetime.now().isoformat()
-    save_data('users.json', users)
-    user_data = {k: v for k, v in users[user_index].items() if k != 'password'}
-    return jsonify({'success': True, 'user': user_data}), 200
-
-@app.route('/api/profile/upload-resume', methods=['POST'])
-def upload_resume():
-    if 'resume' not in request.files:
-        return jsonify({'success': False, 'message': 'No file'}), 400
-    file = request.files['resume']
-    user_id = request.form.get('userId')
-    if not user_id or file.filename == '':
-        return jsonify({'success': False, 'message': 'Missing data'}), 400
-    if file and allowed_file(file.filename):
-        filename = secure_filename(f"{user_id}_{file.filename}")
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        users = load_data('users.json')
-        user_index = next((i for i, u in enumerate(users) if u['id'] == user_id), None)
-        if user_index is not None:
-            users[user_index]['resumeFile'] = filename
-            users[user_index]['resumeUploaded'] = True
-            users[user_index]['profileComplete'] = True
-            users[user_index]['updatedAt'] = datetime.now().isoformat()
-            save_data('users.json', users)
-        return jsonify({'success': True, 'filename': filename}), 200
-    return jsonify({'success': False, 'message': 'Invalid file'}), 400
-
-@app.route('/api/jobs', methods=['GET'])
-def get_jobs():
-    jobs = load_data('jobs.json')
-    return jsonify({'success': True, 'jobs': jobs, 'count': len(jobs)}), 200
-
-@app.route('/api/jobs/scrape', methods=['POST'])
-def scrape_jobs():
-    data = request.json or {}
-    keyword = data.get('keyword', 'software engineer')
-    location = data.get('location', 'bangalore')
-    try:
-        jobs = scraper.scrape_all(keyword=keyword, location=location)
-        save_data('jobs.json', jobs)
-        return jsonify({'success': True, 'jobs': jobs, 'count': len(jobs)}), 200
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-@app.route('/api/jobs/filter', methods=['POST'])
-def filter_jobs():
-    filters = request.json
-    jobs = load_data('jobs.json')
-    filtered = jobs
-    if filters.get('search'):
-        s = filters['search'].lower()
-        filtered = [j for j in filtered if s in j.get('title', '').lower() or s in j.get('company', '').lower() or any(s in str(sk).lower() for sk in j.get('skills', []))]
-    if filters.get('location'):
-        loc = filters['location'].lower()
-        filtered = [j for j in filtered if loc in j.get('location', '').lower()]
-    if filters.get('experience'):
-        filtered = [j for j in filtered if j.get('experience') == filters['experience']]
-    if filters.get('source'):
-        filtered = [j for j in filtered if j.get('source') == filters['source']]
-    return jsonify({'success': True, 'jobs': filtered, 'count': len(filtered)}), 200
-
-@app.route('/api/jobs/<int:job_id>', methods=['GET'])
-def get_job(job_id):
-    jobs = load_data('jobs.json')
-    job = next((j for j in jobs if j.get('id') == job_id), None)
-    if not job:
-        return jsonify({'success': False, 'message': 'Job not found'}), 404
-    return jsonify({'success': True, 'job': job}), 200
-
-@app.route('/api/applications/apply', methods=['POST'])
-def apply_job():
-    data = request.json
-    if not data.get('userId') or not data.get('jobId'):
-        return jsonify({'success': False, 'message': 'Missing fields'}), 400
-    apps = load_data('applications.json')
-    if any(a['userId'] == data['userId'] and a['jobId'] == data['jobId'] for a in apps):
-        return jsonify({'success': False, 'message': 'Already applied'}), 400
-    new_app = {
-        'id': str(uuid.uuid4()),
-        'userId': data['userId'],
-        'jobId': data['jobId'],
-        'status': 'applied',
-        'appliedAt': datetime.now().isoformat()
-    }
-    apps.append(new_app)
-    save_data('applications.json', apps)
-    return jsonify({'success': True, 'application': new_app}), 201
-
-@app.route('/api/applications/user/<user_id>', methods=['GET'])
-def get_user_applications(user_id):
-    apps = load_data('applications.json')
-    jobs = load_data('jobs.json')
-    user_apps = [a for a in apps if a['userId'] == user_id]
-    job_ids = [a['jobId'] for a in user_apps]
-    applied_jobs = [j for j in jobs if j.get('id') in job_ids]
-    return jsonify({'success': True, 'applications': user_apps, 'jobs': applied_jobs, 'count': len(user_apps)}), 200
-
-@app.route('/api/saved/add', methods=['POST'])
-def save_job():
-    data = request.json
-    if not data.get('userId') or not data.get('jobId'):
-        return jsonify({'success': False, 'message': 'Missing fields'}), 400
-    saved = load_data('saved_jobs.json')
-    if any(s['userId'] == data['userId'] and s['jobId'] == data['jobId'] for s in saved):
-        return jsonify({'success': False, 'message': 'Already saved'}), 400
-    saved_entry = {
-        'id': str(uuid.uuid4()),
-        'userId': data['userId'],
-        'jobId': data['jobId'],
-        'savedAt': datetime.now().isoformat()
-    }
-    saved.append(saved_entry)
-    save_data('saved_jobs.json', saved)
-    return jsonify({'success': True, 'saved': saved_entry}), 201
-
-@app.route('/api/saved/user/<user_id>', methods=['GET'])
-def get_saved_jobs(user_id):
-    saved = load_data('saved_jobs.json')
-    jobs = load_data('jobs.json')
-    user_saved = [s for s in saved if s['userId'] == user_id]
-    job_ids = [s['jobId'] for s in user_saved]
-    saved_jobs_full = [j for j in jobs if j.get('id') in job_ids]
-    return jsonify({'success': True, 'jobs': saved_jobs_full, 'count': len(saved_jobs_full)}), 200
-
-@app.route('/api/saved/remove', methods=['POST'])
-def unsave_job():
-    data = request.json
-    saved = load_data('saved_jobs.json')
-    saved = [s for s in saved if not (s['userId'] == data['userId'] and s['jobId'] == data['jobId'])]
-    save_data('saved_jobs.json', saved)
-    return jsonify({'success': True}), 200
-
-@app.route('/api/analytics/stats', methods=['GET'])
-def get_stats():
-    jobs = load_data('jobs.json')
-    users = load_data('users.json')
-    apps = load_data('applications.json')
-    saved = load_data('saved_jobs.json')
-    stats = {
-        'totalJobs': len(jobs),
-        'totalUsers': len(users),
-        'totalApplications': len(apps),
-        'totalSaved': len(saved),
-        'jobsBySource': {},
-        'jobsByLocation': {}
-    }
-    for job in jobs:
-        source = job.get('source', 'unknown')
-        stats['jobsBySource'][source] = stats['jobsBySource'].get(source, 0) + 1
-        location = job.get('location', 'unknown')
-        stats['jobsByLocation'][location] = stats['jobsByLocation'].get(location, 0) + 1
-    return jsonify({'success': True, 'stats': stats}), 200
-
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({'success': False, 'message': 'Not found'}), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    return jsonify({'success': False, 'message': 'Server error'}), 500
-
-import atexit
-atexit.register(lambda: scheduler.shutdown())
-
-if __name__ == '__main__':
-    print("="*50)
-    print("HireWizard - Real Job Scraper")
-    print("="*50)
-    print("Server: http://localhost:5000")
-    print("Auto-scraping: Every 6 hours")
-    print("="*50)
-    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
