@@ -197,3 +197,79 @@ def upload_resume():
         return jsonify({'success': True, 'filename': filename}), 200
     return jsonify({'success': False, 'message': 'Invalid file'}), 400
 
+# =====================================================
+# SECTION 6: JOBS ENDPOINTS - Ridham Singh
+# =====================================================
+@app.route('/api/jobs', methods=['GET'])
+def get_jobs():
+    """Get all jobs"""
+    jobs = load_data('jobs.json')
+    return jsonify({'success': True, 'jobs': jobs, 'count': len(jobs)}), 200
+
+@app.route('/api/jobs/scrape', methods=['POST'])
+def scrape_jobs():
+    """Manual scrape trigger"""
+    data = request.json or {}
+    keyword = data.get('keyword', 'software engineer')
+    location = data.get('location', 'bangalore')
+    try:
+        jobs = scraper.scrape_all(keyword=keyword, location=location)
+        for idx, job in enumerate(jobs, 1):
+            job['id'] = idx
+        save_data('jobs.json', jobs)
+        return jsonify({'success': True, 'jobs': jobs, 'count': len(jobs)}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/jobs/filter', methods=['POST'])
+def filter_jobs():
+    """Filter jobs by multiple criteria"""
+    filters = request.json
+    jobs = load_data('jobs.json')
+    filtered = jobs
+    
+    print(f"DEBUG: Filters received = {filters}")
+    
+    # Search filter
+    if filters.get('search') and filters['search'].strip():
+        s = filters['search'].lower()
+        filtered = [j for j in filtered if s in j.get('title', '').lower() or s in j.get('company', '').lower()]
+        print(f"  After search: {len(filtered)} jobs")
+    
+    # Location filter
+    if filters.get('location') and filters['location'].strip():
+        loc = filters['location'].lower()
+        filtered = [j for j in filtered if j.get('location', '').lower() == loc]
+        print(f"  After location: {len(filtered)} jobs")
+    
+    # Experience filter - STRICT EXACT MATCH
+    if filters.get('experience') and filters['experience'].strip():
+        exp_filter = filters['experience'].strip()
+        filtered = [j for j in filtered if j.get('experience', '').strip() == exp_filter]
+        print(f"  After experience ({exp_filter}): {len(filtered)} jobs")
+    
+    # Salary filter - STRICT EXACT MATCH
+    if filters.get('salary') and filters['salary'].strip():
+        sal_filter = filters['salary'].strip()
+        filtered = [j for j in filtered if j.get('salary', '').strip() == sal_filter]
+        print(f"  After salary ({sal_filter}): {len(filtered)} jobs")
+    
+    # Source filter
+    if filters.get('source') and filters['source'].strip():
+        src = filters['source'].lower()
+        filtered = [j for j in filtered if j.get('source', '').lower() == src]
+        print(f"  After source: {len(filtered)} jobs")
+    
+    print(f"FINAL: {len(filtered)} jobs")
+    return jsonify({'success': True, 'jobs': filtered, 'count': len(filtered)}), 200
+
+@app.route('/api/jobs/<int:job_id>', methods=['GET'])
+def get_job(job_id):
+    """Get job details"""
+    jobs = load_data('jobs.json')
+    job = next((j for j in jobs if j.get('id') == job_id), None)
+    if not job:
+        return jsonify({'success': False, 'message': 'Job not found'}), 404
+    return jsonify({'success': True, 'job': job}), 200
+
+
