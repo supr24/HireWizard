@@ -132,3 +132,35 @@ class JobScraper:
         
         return self.jobs
     
+    
+    # =========================================
+    # SECTION 7: ORCHESTRATE ALL SCRAPERS - Supriya Rawat
+    # =========================================
+    def scrape_all(self, keyword="software engineer", location="bangalore"):
+        """Combine all sources"""
+        self.jobs = []
+        
+        print(f"  Scraping {keyword} in {location}...")
+        
+        self.scrape_naukri(keyword, location, max_jobs=20)
+        time.sleep(0.3)
+        
+        self.scrape_indeed(keyword, location, max_jobs=20)
+        time.sleep(0.3)
+        
+        self.scrape_linkedin(keyword, location, max_jobs=10)
+        
+        print(f"    ✓ {len(self.jobs)} jobs loaded")
+        
+        return self.jobs
+    
+    # =========================================
+    # SECTION 8: GET JOB DETAILS - Supriya Rawat
+    # =========================================
+    def get_job_details(self, job_url, source):
+        """Get job details"""
+        return {
+            'description': 'Click URL to view full details',
+            'requirements': [],
+            'responsibilities': []
+        }
