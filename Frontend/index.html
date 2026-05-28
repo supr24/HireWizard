@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HireWizard - Your AI Job Hunter</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Particle Background Canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- ========== LANDING PAGE (Logged Out) ========== -->
+    <div id="landing-page" class="page-container">
+        <!-- Navigation -->
+        <nav class="glass-nav">
+            <div class="nav-content">
+                <div class="logo-container">
+                    <div class="logo-orb"></div>
+                    <span class="logo-text">HireWizard</span>
+                </div>
+                <div class="nav-actions">
+                    <button class="btn-ghost" id="btn-open-login">Login</button>
+                    <button class="btn-primary" id="btn-open-signup">Get Started</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-sparkles"></i>
+                    <span>AI-Powered Job Aggregation</span>
+                </div>
+                <h1 class="hero-title">
+                    Your Dream Job is
+                    <span class="gradient-text typewriter">Waiting...</span>
+                </h1>
+                <p class="hero-description">
+                    HireWizard automatically scrapes jobs from Naukri, LinkedIn, and Indeed. 
+                    Smart filters, zero duplicates, real-time updates - all in one place.
+                </p>
+                <div class="hero-cta">
+                    <button class="btn-hero" id="btn-hero-signup">
+                        <span>Start Job Hunting</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">450+</div>
+                        <div class="stat-label">Live Jobs</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div class="stat-number">200+</div>
+                        <div class="stat-label">Companies</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div class="stat-number">6H</div>
+                        <div class="stat-label">Auto-Refresh</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Grid -->
+        <section class="features-section">
+            <div class="section-header">
+                <span class="section-tag">Features</span>
+                <h2 class="section-title">Why Engineers Choose Us</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>Smart Automation</h3>
+                    <p>Auto-scrapes jobs every 6 hours from multiple portals</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-filter"></i>
+                    </div>
+                    <h3>Advanced Filters</h3>
+                    <p>Filter by location, salary, experience, and tech stack</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clone"></i>
+                    </div>
+                    <h3>No Duplicates</h3>
+                    <p>Intelligent deduplication removes repeated listings</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Market Insights</h3>
+                    <p>Real-time salary trends and analytics dashboard</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ========== LOGIN MODAL ========== -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal-container glass-card">
+            <button class="modal-close" id="close-login">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h2>Welcome Back</h2>
+                <p>Login to continue your job search</p>
+            </div>
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="login-email" placeholder="your.email@example.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="login-password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                <div class="form-footer">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="remember-me">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="link-text">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <span>Login</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+            <div class="modal-switch">
+                <p>Don't have an account? <a href="#" id="switch-to-signup">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== SIGNUP MODAL ========== -->
+    <div id="signup-modal" class="modal-overlay">
+        <div class="modal-container glass-card">
+            <button class="modal-close" id="close-signup">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h2>Create Account</h2>
+                <p>Join thousands of job seekers</p>
+            </div>
+            <form id="signup-form" class="auth-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="signup-name" placeholder="John Doe" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="signup-email" placeholder="your.email@example.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="signup-password" placeholder="Create a strong password" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="signup-confirm" placeholder="Re-enter password" required>
+                    </div>
+                </div>
+                <div class="form-footer">
+                    <label class="checkbox-container">
+                        <input type="checkbox" required>
+                        <span>I agree to Terms & Conditions</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <span>Create Account</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+            <div class="modal-switch">
+                <p>Already have an account? <a href="#" id="switch-to-login">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== PROFILE SETUP MODAL ========== -->
+    <div id="profile-setup-modal" class="modal-overlay">
+        <div class="modal-container glass-card large-modal">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <h2>Complete Your Profile</h2>
+                <p>Choose how you want to build your profile</p>
+            </div>
+            
+            <!-- Profile Setup Options -->
+            <div class="profile-options">
+                <div class="option-card" id="upload-resume-option">
+                    <div class="option-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>Upload Resume</h3>
+                    <p>Quick setup using your existing resume</p>
+                    <button class="btn-option">Choose This</button>
+                </div>
+                <div class="option-divider">
+                    <span>OR</span>
+                </div>
+                <div class="option-card" id="manual-form-option">
+                    <div class="option-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h3>Fill Manually</h3>
+                    <p>Create profile step-by-step</p>
+                    <button class="btn-option">Choose This</button>
+                </div>
+            </div>
+
+            <!-- Resume Upload Section -->
+            <div id="resume-upload-section" class="profile-section" style="display:none;">
+                <button class="btn-back" id="back-from-upload">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <h3>Upload Your Resume</h3>
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <p class="upload-text">Drag & drop your resume here</p>
+                    <p class="upload-subtext">or click to browse</p>
+                    <input type="file" id="resume-file" accept=".pdf,.doc,.docx" hidden>
+                    <button class="btn-browse" id="btn-browse">Browse Files</button>
+                </div>
+                <div id="file-preview" class="file-preview" style="display:none;">
+                    <div class="file-info">
+                        <i class="fas fa-file-alt"></i>
+                        <span id="file-name"></span>
+                    </div>
+                    <button class="btn-remove" id="remove-file">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <button class="btn-submit" id="submit-resume" style="display:none;">
+                    <span>Analyze Resume</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- Manual Form Section -->
+            <div id="manual-form-section" class="profile-section" style="display:none;">
+                <button class="btn-back" id="back-from-manual">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <h3>Build Your Profile</h3>
+                <form id="profile-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="profile-phone" placeholder="+91 98765 43210" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <select id="profile-location" required>
+                                <option value="">Select Location</option>
+                                <option value="bangalore">Bangalore</option>
+                                <option value="dehradun">Dehradun</option>
+                                <option value="gurgaon">Gurgaon</option>
+                                <option value="noida">Noida</option>
+                                <option value="delhi">Delhi NCR</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Experience Level</label>
+                            <select id="profile-experience" required>
+                                <option value="">Select Experience</option>
+                                <option value="fresher">Fresher (0-1 year)</option>
+                                <option value="junior">Junior (1-3 years)</option>
+                                <option value="mid">Mid-level (3-5 years)</option>
+                                <option value="senior">Senior (5+ years)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Expected Salary (LPA)</label>
+                            <input type="number" id="profile-salary" placeholder="e.g., 6" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Skills (comma separated)</label>
+                        <input type="text" id="profile-skills" placeholder="e.g., JavaScript, React, Node.js" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Education</label>
+                        <input type="text" id="profile-education" placeholder="e.g., B.Tech in Computer Science" required>
+                    </div>
+                    <div class="form-group">
+                        <label>LinkedIn Profile (Optional)</label>
+                        <input type="url" id="profile-linkedin" placeholder="https://linkedin.com/in/yourprofile">
+                    </div>
+                    <button type="submit" class="btn-submit">
+                        <span>Complete Profile</span>
+                        <i class="fas fa-check"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== DASHBOARD (Logged In) ========== -->
+    <div id="dashboard-page" class="page-container" style="display:none;">
+        <!-- Dashboard Navigation -->
+        <nav class="glass-nav">
+            <div class="nav-content">
+                <div class="logo-container">
+                    <div class="logo-orb"></div>
+                    <span class="logo-text">HireWizard</span>
+                </div>
+                <div class="nav-menu">
+                    <a href="#" class="nav-item active" id="nav-jobs">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Jobs</span>
+                    </a>
+                    <a href="#" class="nav-item" id="nav-applications">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Applications</span>
+                    </a>
+                    <a href="#" class="nav-item" id="nav-saved">
+                        <i class="fas fa-bookmark"></i>
+                        <span>Saved</span>
+                    </a>
+                    <a href="#" class="nav-item" id="nav-analytics">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </a>
+                </div>
+                <div class="nav-actions">
+                    <button class="btn-profile" id="btn-profile">
+                        <div class="profile-avatar">
+                            <span id="user-initials">U</span>
+                        </div>
+                        <span id="user-name-nav">User</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Profile Dropdown -->
+        <div id="profile-dropdown" class="profile-dropdown glass-card">
+            <div class="dropdown-header">
+                <div class="profile-avatar large">
+                    <span id="user-initials-dropdown">U</span>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-name" id="user-name-dropdown">User</div>
+                    <div class="profile-email" id="user-email-dropdown">user@example.com</div>
+                </div>
+            </div>
+            <div class="dropdown-menu">
+                <a href="#" class="dropdown-item">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="#" class="dropdown-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item" id="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <!-- Welcome Banner -->
+            <div class="welcome-banner glass-card">
+                <div class="welcome-content">
+                    <h1>Welcome back, <span id="user-name-welcome">User</span>! 👋</h1>
+                    <p>We found <strong id="new-jobs-count">12 new jobs</strong> matching your profile</p>
+                </div>
+                <div class="welcome-actions">
+                    <button class="btn-primary" id="btn-refresh-jobs">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh Jobs</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="search-section glass-card">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="job-search" placeholder="Search by job title, company, or skills...">
+                </div>
+                <div class="filters-row">
+                    <select id="filter-location" class="filter-select">
+                        <option value="">All Locations</option>
+                        <option value="bangalore">Bangalore</option>
+                        <option value="dehradun">Dehradun</option>
+                        <option value="gurgaon">Gurgaon</option>
+                        <option value="noida">Noida</option>
+                        <option value="delhi">Delhi NCR</option>
+                    </select>
+                    <select id="filter-salary" class="filter-select">
+                        <option value="">All Salaries</option>
+                        <option value="3-5 LPA">3-5 LPA</option>
+                        <option value="5-10 LPA">5-10 LPA</option>
+                        <option value="10-15 LPA">10-15 LPA</option>
+                        <option value="15-20 LPA">15-20 LPA</option>
+                        <option value="20+ LPA">20+ LPA</option>
+                    </select>
+                    <select id="filter-experience" class="filter-select">
+                        <option value="">All Experience</option>
+                        <option value="0-2 years">0-2 years</option>
+                        <option value="2-4 years">2-4 years</option>
+                        <option value="4-6 years">4-6 years</option>
+                        <option value="6+ years">6+ years</option>
+                    </select>
+                    <select id="filter-source" class="filter-select">
+                        <option value="">All Sources</option>
+                        <option value="naukri">Naukri</option>
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="indeed">Indeed</option>
+                    </select>
+                    <button class="btn-filter" id="apply-filters">
+                        <i class="fas fa-filter"></i>
+                        <span>Apply</span>
+                    </button>
+                    <button class="btn-filter-clear" id="clear-filters">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Jobs Grid -->
+            <div class="jobs-container" id="jobs-container">
+                <!-- Jobs will be dynamically inserted here -->
+            </div>
+
+            <!-- Applications Section -->
+            <div id="applications-container" style="display:none;">
+                <h2 style="margin-bottom:2rem;">My Applications</h2>
+                <div id="applications-list"></div>
+            </div>
+
+            <!-- Saved Jobs Section -->
+            <div id="saved-container" style="display:none;">
+                <h2 style="margin-bottom:2rem;">Saved Jobs</h2>
+                <div id="saved-list"></div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics-container" style="display:none;">
+                <h2 style="margin-bottom:2rem;">Analytics</h2>
+                <div id="analytics-content"></div>
+            </div>
+
+            <!-- Load More -->
+            <div class="load-more-section">
+                <button class="btn-load-more" id="load-more">
+                    <span>Load More Jobs</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Loading...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
